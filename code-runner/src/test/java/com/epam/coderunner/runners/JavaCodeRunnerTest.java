@@ -1,6 +1,5 @@
 package com.epam.coderunner.runners;
 
-import com.epam.coderunner.Status;
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TasksStorage;
 import com.google.common.collect.ImmutableMap;
@@ -9,10 +8,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.verification.VerificationMode;
+import org.mockito.stubbing.Answer;
 
 import java.util.Map;
 
@@ -21,17 +19,17 @@ import static com.epam.coderunner.Status.PASS;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.calls;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.client.ExpectedCount.once;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JavaCodeRunnerTest {
 
-    @Mock
-    private TasksStorage tasksStorage;
+    private final TasksStorage tasksStorage = mock(TasksStorage.class);
+    private final TaskExecutor taskExecutor = mock(TaskExecutor.class);
 
     private String code = "" +
             "import java.util.function.Function;\n" +
@@ -44,11 +42,15 @@ public class JavaCodeRunnerTest {
             "    }\n" +
             "}";
 
-    private JavaCodeRunner testee = new JavaCodeRunner();
+    private final JavaCodeRunner testee = new JavaCodeRunner(tasksStorage, taskExecutor);
 
     @Before
-    public void init(){
-        testee.setTasksStorage(tasksStorage);
+    public void setup(){
+        doAnswer(invocationOnMock -> {
+            final Runnable task = invocationOnMock.getArgument(0);
+            task.run();
+            return null;
+        }).when(taskExecutor).submit(any());
     }
 
     @Test
@@ -69,6 +71,7 @@ public class JavaCodeRunnerTest {
         ArgumentCaptor<TestingStatus> captor = ArgumentCaptor.forClass(TestingStatus.class);
 
         verify(tasksStorage).updateTestStatus(anyString(), captor.capture());
+        verify(taskExecutor).submit(any());
 
         TestingStatus result = captor.getValue();
 
