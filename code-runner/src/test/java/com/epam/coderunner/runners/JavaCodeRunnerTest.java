@@ -68,9 +68,9 @@ public class JavaCodeRunnerTest {
 
         ArgumentCaptor<TestingStatus> captor = ArgumentCaptor.forClass(TestingStatus.class);
 
-        verify(tasksStorage, times(inOut.size() + 1)).updateTestStatus(anyString(), captor.capture());
+        verify(tasksStorage).updateTestStatus(anyString(), captor.capture());
 
-        TestingStatus result = captor.getAllValues().get(inOut.size());
+        TestingStatus result = captor.getValue();
 
         assertTrue(result.isAllTestsDone());
         assertFalse(result.isAllTestsPassed());

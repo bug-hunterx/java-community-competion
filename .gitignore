@@ -23,3 +23,7 @@
 hs_err_pid*
 
 node_modules
+
+# build misc
+.idea/
+code-runner/target/
