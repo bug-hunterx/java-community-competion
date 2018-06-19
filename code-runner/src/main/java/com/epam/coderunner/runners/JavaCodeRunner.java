@@ -27,6 +27,7 @@ public class JavaCodeRunner {
     @SuppressWarnings("unchecked")
     public String runCode(String className, String source, Map<String, String> inputOutputs) {
         try {
+            SourceCodeGuard.check(source);
             Object obj = Reflect.compile(className, source).create().get();
             LOG.debug("Source code has type of {}", obj.getClass());
             Function<String, String> function = (Function<String, String>)obj;
