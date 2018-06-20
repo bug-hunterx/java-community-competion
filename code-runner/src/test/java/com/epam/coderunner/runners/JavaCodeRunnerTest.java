@@ -1,5 +1,6 @@
 package com.epam.coderunner.runners;
 
+import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TasksStorage;
 import com.google.common.collect.ImmutableMap;
@@ -30,7 +31,7 @@ public class JavaCodeRunnerTest {
     private static final String code = "" +
             "import java.util.function.Function;\n" +
             "\n" +
-            "public class Test implements Function<String, String> {\n" +
+            "public class Solution1 implements Function<String, String> {\n" +
             "\n" +
             "    @Override\n" +
             "    public String apply(String s) {\n" +
@@ -53,7 +54,9 @@ public class JavaCodeRunnerTest {
                 "2", "2",
                 "asdasd, asdads", "asdasd, asdasd"
         );
-        doReturn(inOut).when(tasksStorage).getTask(1);
+        final Task task = new Task();
+        task.setAcceptanceTests(inOut);
+        doReturn(task).when(tasksStorage).getTask(1);
     }
 
     @Test
@@ -64,7 +67,7 @@ public class JavaCodeRunnerTest {
 
         ArgumentCaptor<TestingStatus> captor = ArgumentCaptor.forClass(TestingStatus.class);
 
-        verify(tasksStorage).updateTestStatus(anyString(), captor.capture());
+        verify(tasksStorage).updateTestStatus(anyLong(), captor.capture());
         verify(taskExecutor).submit(any());
 
         TestingStatus result = captor.getValue();

@@ -1,5 +1,6 @@
 package com.epam.coderunner.runners;
 
+import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TasksStorage;
 import org.joor.Reflect;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.function.Function;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Component
 final class JavaCodeRunner implements CodeRunner {
@@ -32,14 +35,15 @@ final class JavaCodeRunner implements CodeRunner {
             final Object obj = Reflect.compile(className, sourceCode).create().get();
             LOG.debug("Source code has type of {}", obj.getClass());
             final Function<String, String> function = (Function<String, String>) obj;
-            final String submissionId = "" + System.currentTimeMillis();
-            final Map<String, String> inputOutputs = tasksStorage.getTask(taskId).getAcceptanceTests();
+            final long submissionId = System.currentTimeMillis();
+            final Task task = checkNotNull(tasksStorage.getTask(taskId), "No task for id=%s found", taskId);
+            final Map<String, String> inputOutputs = task.getAcceptanceTests();
             LOG.debug("Checking code with submission id {}", submissionId);
             taskExecutor.submit(() -> {
                 final TestingStatus testingStatus = SolutionChecker.checkSolution(inputOutputs, function, submissionId);
                 tasksStorage.updateTestStatus(submissionId, testingStatus);
             });
-            return submissionId;
+            return String.valueOf(submissionId);
         } catch (Exception e) {
             LOG.error("Error while compiling: ", e);
             return "COMPILATION_ERROR: " + e.getMessage();

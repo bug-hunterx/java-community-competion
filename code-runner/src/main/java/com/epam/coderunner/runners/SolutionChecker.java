@@ -13,14 +13,16 @@ final class SolutionChecker {
 
     private SolutionChecker(){}
 
-    static TestingStatus checkSolution(Map<String, String> inputOutputs, Function<String, String> function, String submissionId) {
+    static TestingStatus checkSolution(final Map<String, String> inputOutputs,
+                                       final Function<String, String> function,
+                                       final long submissionId) {
         final TestingStatus testingStatus = new TestingStatus();
         try {
             boolean allTestsPassed = true;
             for (Map.Entry<String, String> entry : inputOutputs.entrySet()) {
-                String input = entry.getKey();
-                String expected = entry.getValue();
-                String actual = function.apply(input);
+                final String input = entry.getKey();
+                final String expected = entry.getValue();
+                final String actual = function.apply(input);
                 if (!actual.equals(expected)) {
                     testingStatus.addStatus(Status.FAIL);
                     allTestsPassed = false;
