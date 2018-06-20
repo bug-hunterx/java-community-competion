@@ -2,7 +2,6 @@ package com.epam.coderunner.runners;
 
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TasksStorage;
-import com.google.common.util.concurrent.MoreExecutors;
 import org.joor.Reflect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class JavaCodeRunner {
+final class JavaCodeRunner implements CodeRunner {
     private static final Logger LOG = LoggerFactory.getLogger(JavaCodeRunner.class);
 
     private final TasksStorage tasksStorage;
@@ -26,21 +25,22 @@ public class JavaCodeRunner {
     }
 
     @SuppressWarnings("unchecked")
-    public String runCode(String className, String source, Map<String, String> inputOutputs) {
+    @Override public String run(final long taskId, final String sourceCode) {
+        final String className = "Solution" + taskId;
         try {
-            SourceCodeGuard.check(source);
-            Object obj = Reflect.compile(className, source).create().get();
+            SourceCodeGuard.check(sourceCode);
+            final Object obj = Reflect.compile(className, sourceCode).create().get();
             LOG.debug("Source code has type of {}", obj.getClass());
-            Function<String, String> function = (Function<String, String>)obj;
-            String submissionId = "" + System.currentTimeMillis();
-
+            final Function<String, String> function = (Function<String, String>) obj;
+            final String submissionId = "" + System.currentTimeMillis();
+            final Map<String, String> inputOutputs = tasksStorage.getTask(taskId).getAcceptanceTests();
             LOG.debug("Checking code with submission id {}", submissionId);
             taskExecutor.submit(() -> {
                 final TestingStatus testingStatus = SolutionChecker.checkSolution(inputOutputs, function, submissionId);
                 tasksStorage.updateTestStatus(submissionId, testingStatus);
             });
             return submissionId;
-        } catch(Exception e){
+        } catch (Exception e) {
             LOG.error("Error while compiling: ", e);
             return "COMPILATION_ERROR: " + e.getMessage();
         }

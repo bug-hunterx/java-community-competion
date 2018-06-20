@@ -8,22 +8,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 
 import java.util.Map;
 
-import static com.epam.coderunner.Status.FAIL;
-import static com.epam.coderunner.Status.PASS;
+import static com.epam.coderunner.model.Status.FAIL;
+import static com.epam.coderunner.model.Status.PASS;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JavaCodeRunnerTest {
@@ -31,7 +27,7 @@ public class JavaCodeRunnerTest {
     private final TasksStorage tasksStorage = mock(TasksStorage.class);
     private final TaskExecutor taskExecutor = mock(TaskExecutor.class);
 
-    private String code = "" +
+    private static final String code = "" +
             "import java.util.function.Function;\n" +
             "\n" +
             "public class Test implements Function<String, String> {\n" +
@@ -51,20 +47,18 @@ public class JavaCodeRunnerTest {
             task.run();
             return null;
         }).when(taskExecutor).submit(any());
-    }
 
-    @Test
-    public void shouldCompileAndRun() throws InterruptedException {
-
-        Map<String, String> inOut = ImmutableMap.of(
+        final Map<String, String> inOut = ImmutableMap.of(
                 "1", "1",
                 "2", "2",
                 "asdasd, asdads", "asdasd, asdasd"
         );
+        doReturn(inOut).when(tasksStorage).getTask(1);
+    }
 
-
-
-        testee.runCode("Test", code, inOut);
+    @Test
+    public void shouldCompileAndRun() throws InterruptedException {
+        testee.run(1, code);
 
         Thread.sleep(1000);
 

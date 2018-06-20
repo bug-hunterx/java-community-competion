@@ -1,7 +1,5 @@
 package com.epam.coderunner.model;
 
-import com.epam.coderunner.Status;
-
 import java.util.Collection;
 import java.util.LinkedList;
 

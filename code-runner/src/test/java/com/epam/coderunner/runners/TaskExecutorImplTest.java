@@ -28,10 +28,15 @@ public final class TaskExecutorImplTest {
         }
     };
 
+    private final Runnable task3 = () -> {
+        while(true){}
+    };
+
     @Test
     public void submit() {
         taskExecutor.submit(task1);
         taskExecutor.submit(task2);
+        taskExecutor.submit(task3);
         Awaitility.waitAtMost(TASK_TIMEOUT_SECONDS * 3, TimeUnit.SECONDS).until(() ->
                 task1Marker.get() && task2Marker.get()
         );

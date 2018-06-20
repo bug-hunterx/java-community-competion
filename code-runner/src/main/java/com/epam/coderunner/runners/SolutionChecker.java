@@ -1,6 +1,6 @@
 package com.epam.coderunner.runners;
 
-import com.epam.coderunner.Status;
+import com.epam.coderunner.model.Status;
 import com.epam.coderunner.model.TestingStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

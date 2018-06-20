@@ -5,6 +5,10 @@ import com.epam.coderunner.model.TestingStatus;
 
 public interface TasksStorage {
 
-    Task getTask(String taskId);
+    Task getTask(final long taskId);
     void updateTestStatus(String submissionId, TestingStatus testingStatus);
+
+    static TasksStorage redisTasksStorage(final String redisHost){
+        return new RedisTasksStorage(redisHost);
+    }
 }

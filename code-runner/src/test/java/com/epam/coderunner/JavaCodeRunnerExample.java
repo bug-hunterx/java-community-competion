@@ -1,4 +1,4 @@
-package com.epam.coderunner.runners;
+package com.epam.coderunner;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticListener;

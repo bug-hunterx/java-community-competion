@@ -48,6 +48,8 @@ final class TaskExecutorImpl implements TaskExecutor {
                 }
             }
         }
+        final int currentWatchedCnt = taskCnt.get();
+        LOG.debug("{} timeout tasks terminated, {} watched tasks left.(Count is Not precise)", cnt - currentWatchedCnt, currentWatchedCnt);
     }
 
     private static ExecutorService provideExecutorService() {

@@ -1,9 +1,7 @@
 package com.epam.coderunner.controllers;
 
-import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TaskRequest;
-import com.epam.coderunner.runners.JavaCodeRunner;
-import com.epam.coderunner.storage.TasksStorage;
+import com.epam.coderunner.runners.CodeRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,18 +12,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.io.IOException;
-
 @Controller
-public class FileUploadController {
+final class FileUploadController {
     private static final Logger LOG = LoggerFactory.getLogger(FileUploadController.class);
 
+    private final CodeRunner runner;
 
     @Autowired
-    private JavaCodeRunner runner;
-
-    @Autowired
-    private TasksStorage tasksStorage;
+    public FileUploadController(final CodeRunner runner) {
+        this.runner = runner;
+    }
 
     @GetMapping("/")
     public String loadUploadPage(){
@@ -33,10 +29,9 @@ public class FileUploadController {
     }
 
     @PostMapping("/task/{taskId}")
-    public @ResponseBody String handleFileUpload(@PathVariable String taskId, @RequestBody TaskRequest code) throws IOException {
-            Task task = tasksStorage.getTask(taskId);
+    public @ResponseBody String handleFileUpload(@PathVariable long taskId, @RequestBody TaskRequest code){
             LOG.debug("Running code {}", code.getSource());
-            return runner.runCode("Solution" + taskId, code.getSource(), task.getAcceptanceTests());
+            return runner.run(taskId, code.getSource());
     }
 
 }
