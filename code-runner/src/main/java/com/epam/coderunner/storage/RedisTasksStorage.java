@@ -2,6 +2,7 @@ package com.epam.coderunner.storage;
 
 import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TestingStatus;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,14 +30,26 @@ final class RedisTasksStorage implements TasksStorage {
     }
 
     @Override
-    public void updateTestStatus(String submissionId, TestingStatus testingStatus){
-        String json = gson.toJson(testingStatus);
-        LOG.debug("testing status: {}", json);
+    public void updateTestStatus(final long submissionId, final TestingStatus testingStatus){
+        final String json = gson.toJson(testingStatus);
+        LOG.debug("Update testing status: {}, submissionId={}", json, submissionId);
         jedis.set(generateSubmissionKey(submissionId), json);
     }
 
+    @VisibleForTesting
+    @Override
+    public void saveTask(final long taskId, final Task task) {
+        jedis.set("task:"+ taskId, gson.toJson(task));
+    }
+    @VisibleForTesting
+    @Override
+    public TestingStatus getTestStatus(final long submissionId) {
+        final String json = jedis.get(generateSubmissionKey(submissionId));
+        LOG.debug("Get testing status: {}, submissionId={}", json, submissionId);
+        return gson.fromJson(json, TestingStatus.class);
+    }
 
-    private static String generateSubmissionKey(String submissionId){
+    private static String generateSubmissionKey(final long submissionId){
         return "submission:" + submissionId;
     }
 

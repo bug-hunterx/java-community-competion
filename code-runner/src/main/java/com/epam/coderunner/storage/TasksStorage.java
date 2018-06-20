@@ -2,11 +2,17 @@ package com.epam.coderunner.storage;
 
 import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TestingStatus;
+import com.google.common.annotations.VisibleForTesting;
 
 public interface TasksStorage {
 
     Task getTask(final long taskId);
-    void updateTestStatus(String submissionId, TestingStatus testingStatus);
+    void updateTestStatus(final long submissionId, final TestingStatus testingStatus);
+
+    @VisibleForTesting
+    void saveTask(final long taskId, final Task task);
+    @VisibleForTesting
+    TestingStatus getTestStatus(final long submissionId);
 
     static TasksStorage redisTasksStorage(final String redisHost){
         return new RedisTasksStorage(redisHost);
