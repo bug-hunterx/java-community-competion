@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -20,6 +21,7 @@ final class JavaCodeRunner implements CodeRunner {
 
     private final TasksStorage tasksStorage;
     private final TaskExecutor taskExecutor;
+    private final AtomicLong classId = new AtomicLong(10000);
 
     @Autowired
     JavaCodeRunner(final TasksStorage tasksStorage, final TaskExecutor taskExecutor) {
@@ -29,10 +31,9 @@ final class JavaCodeRunner implements CodeRunner {
 
     @SuppressWarnings("unchecked")
     @Override public String run(final long taskId, final String sourceCode) {
-        final String className = "Solution" + taskId;
+        final String className = "LoadedClass" + classId.getAndIncrement();
         try {
-            SourceCodeGuard.check(sourceCode);
-            final Object obj = Reflect.compile(className, sourceCode).create().get();
+            final Object obj = Reflect.compile(className, SourceCodeGuard.checkAndRename(sourceCode, className)).create().get();
             LOG.debug("Source code has type of {}", obj.getClass());
             final Function<String, String> function = (Function<String, String>) obj;
             final long submissionId = System.currentTimeMillis();
@@ -42,11 +43,16 @@ final class JavaCodeRunner implements CodeRunner {
             taskExecutor.submit(() -> {
                 final TestingStatus testingStatus = SolutionChecker.checkSolution(inputOutputs, function, submissionId);
                 tasksStorage.updateTestStatus(submissionId, testingStatus);
+                disposeClass(className);
             });
             return String.valueOf(submissionId);
         } catch (Exception e) {
             LOG.error("Error while compiling: ", e);
             return "COMPILATION_ERROR: " + e.getMessage();
         }
+    }
+
+    private static void disposeClass(final String className){
+
     }
 }
