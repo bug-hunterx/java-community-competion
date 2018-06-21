@@ -1,5 +1,7 @@
 package com.epam.coderunner.runners;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 interface TaskExecutor {
-    void submit(final Runnable task);
+    ListenableFuture<?> submit(final Runnable task);
 }

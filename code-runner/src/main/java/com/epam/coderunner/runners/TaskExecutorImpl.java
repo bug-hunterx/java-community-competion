@@ -2,6 +2,8 @@ package com.epam.coderunner.runners;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 final class TaskExecutorImpl implements TaskExecutor {
     private static final Logger LOG = LoggerFactory.getLogger(TaskExecutorImpl.class);
 
-    private final ExecutorService taskExecutor = provideExecutorService();
+    private final ListeningExecutorService taskExecutor = provideExecutorService();
     private final ScheduledExecutorService watcherExecutor = Executors.newSingleThreadScheduledExecutor();
     private final Queue<TimedTask> tasks = new ConcurrentLinkedQueue<>();
     /** Only eventual consistency is required. */
@@ -30,10 +32,12 @@ final class TaskExecutorImpl implements TaskExecutor {
     }
 
     @Override
-    public void submit(final Runnable task) {
-        tasks.add(new TimedTask(taskExecutor.submit(task)));
+    public ListenableFuture<?> submit(final Runnable task) {
+        final ListenableFuture<?> submittedTask = taskExecutor.submit(task);
+        tasks.add(new TimedTask(submittedTask));
         taskCnt.incrementAndGet();
         LOG.debug("Task submitted, watched task cnt={}", taskCnt.get());
+        return submittedTask;
     }
 
     @PreDestroy
@@ -59,10 +63,10 @@ final class TaskExecutorImpl implements TaskExecutor {
         LOG.debug("{} timeout tasks terminated, {} watched tasks left.(Count may Not be precise)", cnt - currentWatchedCnt, currentWatchedCnt);
     }
 
-    private static ExecutorService provideExecutorService() {
+    private static ListeningExecutorService provideExecutorService() {
         final int threadCnt = Runtime.getRuntime().availableProcessors();
         Preconditions.checkArgument(threadCnt > 1, "This service cannot be running on single threaded env");
-        return Executors.newFixedThreadPool(threadCnt - 1);
+        return MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(threadCnt - 1));
     }
 
     private static final class TimedTask {
