@@ -13,8 +13,6 @@ public interface TasksStorage {
     void saveTask(final long taskId, final Task task);
     @VisibleForTesting
     TestingStatus getTestStatus(final long submissionId);
-
-    static TasksStorage redisTasksStorage(final String redisHost){
-        return new RedisTasksStorage(redisHost);
-    }
+//    @VisibleForTesting
+//    void clearTestStatus(final long submissionId);
 }

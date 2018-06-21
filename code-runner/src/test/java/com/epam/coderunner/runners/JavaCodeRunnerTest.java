@@ -7,22 +7,17 @@ import com.google.common.collect.ImmutableMap;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Map;
 
 import static com.epam.coderunner.model.Status.FAIL;
 import static com.epam.coderunner.model.Status.PASS;
-import static junit.framework.TestCase.assertTrue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.assertj.core.api.Assertions.*;
+
 public class JavaCodeRunnerTest {
 
     private final TasksStorage tasksStorage = mock(TasksStorage.class);
@@ -65,16 +60,17 @@ public class JavaCodeRunnerTest {
 
         Thread.sleep(1000);
 
-        ArgumentCaptor<TestingStatus> captor = ArgumentCaptor.forClass(TestingStatus.class);
+        final ArgumentCaptor<TestingStatus> captor = ArgumentCaptor.forClass(TestingStatus.class);
 
         verify(tasksStorage).updateTestStatus(anyLong(), captor.capture());
         verify(taskExecutor).submit(any());
 
-        TestingStatus result = captor.getValue();
+        final TestingStatus result = captor.getValue();
+        assertThat(captor.getAllValues().size()).isEqualTo(1);
 
-        assertTrue(result.isAllTestsDone());
-        assertFalse(result.isAllTestsPassed());
+        assertThat(result.isAllTestsDone()).isTrue();
+        assertThat(result.isAllTestsPassed()).isFalse();
 
-        assertThat(result.getTestsStatuses(), Matchers.contains(PASS, PASS, FAIL));
+        assertThat(result.getTestsStatuses()).containsExactly(PASS, PASS, FAIL);
     }
 }

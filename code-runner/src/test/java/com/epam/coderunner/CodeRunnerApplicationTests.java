@@ -1,6 +1,5 @@
 package com.epam.coderunner;
 
-import com.epam.coderunner.model.Status;
 import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TaskRequest;
 import com.epam.coderunner.model.TestingStatus;

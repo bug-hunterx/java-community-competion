@@ -2,11 +2,13 @@ package com.epam.coderunner.runners;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import java.util.Queue;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,7 +19,6 @@ final class TaskExecutorImpl implements TaskExecutor {
 
     private final ExecutorService taskExecutor = provideExecutorService();
     private final ScheduledExecutorService watcherExecutor = Executors.newSingleThreadScheduledExecutor();
-    //todo: shutdown executor services
     private final Queue<TimedTask> tasks = new ConcurrentLinkedQueue<>();
     /** Only eventual consistency is required. */
     private final AtomicInteger taskCnt = new AtomicInteger();
@@ -35,6 +36,12 @@ final class TaskExecutorImpl implements TaskExecutor {
         LOG.debug("Task submitted, watched task cnt={}", taskCnt.get());
     }
 
+    @PreDestroy
+    private void shutdown(){
+        MoreExecutors.shutdownAndAwaitTermination(taskExecutor, 5, TimeUnit.SECONDS);
+        MoreExecutors.shutdownAndAwaitTermination(watcherExecutor, 5, TimeUnit.SECONDS);
+    }
+
     private void terminateTimeoutTasks() {
         final int cnt = taskCnt.get();
         for (int i = 0; i < cnt; i++) {
@@ -49,7 +56,7 @@ final class TaskExecutorImpl implements TaskExecutor {
             }
         }
         final int currentWatchedCnt = taskCnt.get();
-        LOG.debug("{} timeout tasks terminated, {} watched tasks left.(Count is Not precise)", cnt - currentWatchedCnt, currentWatchedCnt);
+        LOG.debug("{} timeout tasks terminated, {} watched tasks left.(Count may Not be precise)", cnt - currentWatchedCnt, currentWatchedCnt);
     }
 
     private static ExecutorService provideExecutorService() {
