@@ -14,8 +14,7 @@ final class SolutionChecker {
     private SolutionChecker(){}
 
     static TestingStatus checkSolution(final Map<String, String> inputOutputs,
-                                       final Function<String, String> function,
-                                       final long submissionId) {
+                                       final Function<String, String> function) {
         final TestingStatus testingStatus = new TestingStatus();
         try {
             boolean allTestsPassed = true;
@@ -26,7 +25,7 @@ final class SolutionChecker {
                 if (!actual.equals(expected)) {
                     testingStatus.addStatus(Status.FAIL);
                     allTestsPassed = false;
-                    LOG.info("Submission id {} failed on test [{}]. Expected: [{}], actual: [{}]", submissionId, input, expected, actual);
+                    LOG.info("Failed on test [{}]. Expected: [{}], actual: [{}]", input, expected, actual);
                 } else {
                     testingStatus.addStatus(Status.PASS);
                 }
@@ -35,7 +34,7 @@ final class SolutionChecker {
             testingStatus.setAllTestsPassed(allTestsPassed);
             LOG.info("Submission id is checked. All tests passed: {}", allTestsPassed);
         } catch (Throwable th){
-            LOG.error("Error while checking submission {}", submissionId, th);
+            LOG.error("Error while checking", th);
         }
         return testingStatus;
     }

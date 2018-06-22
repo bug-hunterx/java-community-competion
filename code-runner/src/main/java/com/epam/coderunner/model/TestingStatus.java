@@ -1,10 +1,13 @@
 package com.epam.coderunner.model;
 
+import com.google.gson.Gson;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
 public class TestingStatus {
 
+    private static final Gson gson = new Gson();
     private Collection<Status> testsStatuses = new LinkedList<>();
     private boolean allTestsDone = false;
     private boolean allTestsPassed = false;
@@ -35,5 +38,9 @@ public class TestingStatus {
 
     public void setAllTestsPassed(boolean allTestsPassed) {
         this.allTestsPassed = allTestsPassed;
+    }
+
+    public String toJson(){
+        return gson.toJson(this);
     }
 }

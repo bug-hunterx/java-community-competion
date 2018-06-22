@@ -1,6 +1,5 @@
 package com.epam.coderunner.runners;
 
-import com.google.common.base.Preconditions;
 import com.google.common.io.Resources;
 
 import java.io.IOException;

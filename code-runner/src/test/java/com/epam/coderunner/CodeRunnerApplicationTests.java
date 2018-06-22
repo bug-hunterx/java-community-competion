@@ -7,37 +7,34 @@ import com.epam.coderunner.storage.TasksStorage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
-import org.awaitility.Awaitility;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static com.epam.coderunner.model.Status.FAIL;
 import static com.epam.coderunner.model.Status.PASS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWebTestClient
 public class CodeRunnerApplicationTests {
 
     private final Gson gson = new Gson();
 
-    @Autowired private MockMvc mockMvc;
+    @Autowired private WebTestClient webTestClient;
     @Autowired private TasksStorage tasksStorage;
 
     @Before
@@ -55,30 +52,34 @@ public class CodeRunnerApplicationTests {
 
     @Test
     public void runTask() throws Exception {
-        final MvcResult result = mockMvc.perform(
-                post("/task/1")
-                        .content(gson.toJson(readTask(1)))
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andReturn();
+        final String taskJson = gson.toJson(readTask(1));
 
-        final long id = Long.valueOf(result.getResponse().getContentAsString());
-        Awaitility.waitAtMost(3, TimeUnit.SECONDS)
-                .pollDelay(200, TimeUnit.MILLISECONDS)
-                .pollInterval(200, TimeUnit.MILLISECONDS)
-                .until(() -> tasksStorage.getTestStatus(id) != null);
-        final TestingStatus testingStatus = tasksStorage.getTestStatus(id);
+        final Flux<String> result = webTestClient
+                .post().uri("task/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromObject(taskJson))
+                .exchange()
+                .returnResult(String.class).getResponseBody();
+
+
+        final String response = result.blockFirst();
+        assertThat(response).isNotEmpty();
+        final TestingStatus testingStatus = gson.fromJson(response, TestingStatus.class);
+
         assertThat(testingStatus.getTestsStatuses()).containsExactly(FAIL, PASS);
     }
 
     @Test
     public void noTask() throws Exception {
-        final MvcResult result = mockMvc.perform(
-                post("/task/9999")
-                        .content(gson.toJson(readTask(9999)))
-                        .contentType(MediaType.APPLICATION_JSON)
-        ).andExpect(status().isOk()).andReturn();
+        final Flux<String> result = webTestClient
+                .post().uri("task/9999")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromObject(gson.toJson(readTask(9999))))
+                .exchange()
+                .returnResult(String.class).getResponseBody();
 
-        assertThat(result.getResponse().getContentAsString()).contains("COMPILATION_ERROR: No task");
+        System.out.println(result.last().block());
+        //assertThat(result.getResponse().getContentAsString()).contains("ERROR: No task");
     }
 
     private static TaskRequest readTask(final int taskId) throws IOException {

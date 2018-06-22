@@ -4,11 +4,11 @@ import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TasksStorage;
 import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.time.Duration;
 import java.util.Map;
 
 import static com.epam.coderunner.model.Status.FAIL;
@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.*;
 public class JavaCodeRunnerTest {
 
     private final TasksStorage tasksStorage = mock(TasksStorage.class);
-    private final TaskExecutor taskExecutor = mock(TaskExecutor.class);
 
     private static final String code = "" +
             "import java.util.function.Function;\n" +
@@ -34,16 +33,10 @@ public class JavaCodeRunnerTest {
             "    }\n" +
             "}";
 
-    private final JavaCodeRunner testee = new JavaCodeRunner(tasksStorage, taskExecutor);
+    private final JavaCodeRunner testee = new JavaCodeRunner(tasksStorage, 1);
 
     @Before
     public void setup(){
-        doAnswer(invocationOnMock -> {
-            final Runnable task = invocationOnMock.getArgument(0);
-            task.run();
-            return null;
-        }).when(taskExecutor).submit(any());
-
         final Map<String, String> inOut = ImmutableMap.of(
                 "1", "1",
                 "2", "2",
@@ -55,19 +48,10 @@ public class JavaCodeRunnerTest {
     }
 
     @Test
-    public void shouldCompileAndRun() throws InterruptedException {
-        testee.run(1, code);
+    public void shouldCompileAndRun() {
 
-        Thread.sleep(1000);
-
-        final ArgumentCaptor<TestingStatus> captor = ArgumentCaptor.forClass(TestingStatus.class);
-
-        verify(tasksStorage).updateTestStatus(anyLong(), captor.capture());
-        verify(taskExecutor).submit(any());
-
-        final TestingStatus result = captor.getValue();
-        assertThat(captor.getAllValues().size()).isEqualTo(1);
-
+        final TestingStatus result = testee.run(1, code).block(Duration.ofSeconds(1));
+        assertThat(result).isNotNull();
         assertThat(result.isAllTestsDone()).isTrue();
         assertThat(result.isAllTestsPassed()).isFalse();
 
