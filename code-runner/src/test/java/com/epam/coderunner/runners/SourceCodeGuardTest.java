@@ -6,7 +6,8 @@ import org.junit.rules.ExpectedException;
 
 public final class SourceCodeGuardTest {
 
-    private final String NEW_LINE = System.lineSeparator();
+    private static final String NEW_LINE = System.lineSeparator();
+    private final SourceCodeGuard sourceCodeGuard = new SourceCodeGuard();
     @Rule public ExpectedException thrown = ExpectedException.none();
 
     @Test
@@ -16,14 +17,14 @@ public final class SourceCodeGuardTest {
                 .append("System.exit(0);")
                 .append("}").toString();
         thrown.expectMessage("keyword");
-        SourceCodeGuard.checkAndRename(source, "SomeName");
+        sourceCodeGuard.check(source);
     }
 
     @Test
     public void classNameDoesNotConform(){
         final String source = "public class BadName{}";
         thrown.expectMessage("Class name");
-        SourceCodeGuard.checkAndRename(source, "SomeName");
+        sourceCodeGuard.check(source);
     }
 
     @Test
@@ -35,7 +36,7 @@ public final class SourceCodeGuardTest {
                 .append("  }").append(NEW_LINE)
                 .append("}").append(NEW_LINE)
                 .toString();
-        final String indexedSource = SourceCodeGuard.checkAndRename(source, "SomeName");
+        final String indexedSource = sourceCodeGuard.renameClass(source, "SomeName");
         System.out.println(indexedSource);
     }
 }

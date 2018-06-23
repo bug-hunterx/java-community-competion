@@ -23,12 +23,15 @@ final class JavaCodeRunner implements CodeRunner {
 
     private final TaskExecutor taskExecutor;
     private final TaskStorage taskStorage;
+    private final RuntimeCodeCompiler codeCompiler;
 
     @Autowired
     JavaCodeRunner(final TaskExecutor taskExecutor,
-                   final TaskStorage taskStorage) {
+                   final TaskStorage taskStorage,
+                   final RuntimeCodeCompiler codeCompiler) {
         this.taskExecutor = taskExecutor;
         this.taskStorage = taskStorage;
+        this.codeCompiler = codeCompiler;
     }
 
     @Override
@@ -41,7 +44,7 @@ final class JavaCodeRunner implements CodeRunner {
         LOG.debug("{}Begin to compile task source, classId={}, source:\n{}", signature, classId.get(), sourceCode);
         final CompiledTask compiledTask;
         try {
-            final Function<String, String> function = RuntimeCodeCompiler.compile(className, sourceCode);
+            final Function<String, String> function = codeCompiler.compile(className, sourceCode);
             final Task task = checkNotNull(taskStorage.getTask(taskId), "No task[id:%s] found", taskId);
             compiledTask = new CompiledTask(userId, taskId, task.getAcceptanceTests(), function);
         } catch (final Exception e) {
@@ -52,6 +55,7 @@ final class JavaCodeRunner implements CodeRunner {
 
         return taskExecutor.submit(() -> SolutionChecker.checkSolution(compiledTask))
                 .doOnSuccess(r -> LOG.debug("{}Testing completed, result:{}", signature, r.toJson()))
-                .doOnError(e -> LOG.debug("{}Testing failed, error:", signature, e));
+                .doOnError(e -> LOG.debug("{}Testing failed, error:", signature, e))
+                .onErrorResume(e -> Mono.just(TestingStatus.error(e)));
     }
 }

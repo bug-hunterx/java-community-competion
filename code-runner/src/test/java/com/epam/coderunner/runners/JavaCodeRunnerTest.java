@@ -35,7 +35,8 @@ public class JavaCodeRunnerTest {
             "    }\n" +
             "}";
 
-    private final JavaCodeRunner testee = new JavaCodeRunner(taskExecutor, taskStorage);
+    private final RuntimeCodeCompiler codeCompiler = new RuntimeCodeCompiler(new SourceCodeGuard());
+    private final JavaCodeRunner testee = new JavaCodeRunner(taskExecutor, taskStorage, codeCompiler);
 
     @Before
     public void setup(){
@@ -71,4 +72,6 @@ public class JavaCodeRunnerTest {
         assertThat(result.getTestsStatuses()).containsExactly(PASS, PASS, FAIL);
         assertThat(result.getCurrentFailedInput()).isEqualTo("asdasd, asdads");
     }
+
+
 }
