@@ -60,4 +60,7 @@ public final class TestingStatus {
     public String toJson() {
         return InternalUtils.toJson(this);
     }
+    public static TestingStatus fromJson(final String json){
+        return InternalUtils.fromJson(json, TestingStatus.class);
+    }
 }
