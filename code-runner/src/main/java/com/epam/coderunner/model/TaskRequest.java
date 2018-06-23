@@ -1,6 +1,6 @@
 package com.epam.coderunner.model;
 
-public final class TaskRequest {
+public final class TaskRequest implements RequestSignature{
     private long taskId;
     private String userId;
     private String source;

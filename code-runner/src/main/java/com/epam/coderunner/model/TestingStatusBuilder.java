@@ -27,8 +27,10 @@ public class TestingStatusBuilder {
         this.allTestsPassed = allTestsPassed;
         return this;
     }
-    public TestingStatusBuilder setCurrentFailedInput(final String currentFailedInput) {
-        this.currentFailedInput = currentFailedInput;
+    public TestingStatusBuilder setCurrentFailedInputIfAbsent(final String currentFailedInput) {
+        if(this.currentFailedInput == null){
+            this.currentFailedInput = currentFailedInput;
+        }
         return this;
     }
     TestingStatusBuilder setErrorInfo(final Throwable exception) {

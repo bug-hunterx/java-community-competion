@@ -18,7 +18,7 @@ public class TaskExecutorImplTest {
     public void passThrough() {
         final TestingStatus testingStatus = TestingStatus.builder()
                 .addStatus(Status.FAIL)
-                .setCurrentFailedInput("someInput").build();
+                .setCurrentFailedInputIfAbsent("someInput").build();
         final Callable<TestingStatus> task = () -> testingStatus;
         final TestingStatus result = taskExecutor.submit(task).block(Duration.ofSeconds(1));
         assertThat(result).isEqualTo(testingStatus);

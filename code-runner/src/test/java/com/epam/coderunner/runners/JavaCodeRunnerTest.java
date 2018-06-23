@@ -69,5 +69,6 @@ public class JavaCodeRunnerTest {
         assertThat(result.isAllTestsDone()).isTrue();
         assertThat(result.isAllTestsPassed()).isFalse();
         assertThat(result.getTestsStatuses()).containsExactly(PASS, PASS, FAIL);
+        assertThat(result.getCurrentFailedInput()).isEqualTo("asdasd, asdads");
     }
 }

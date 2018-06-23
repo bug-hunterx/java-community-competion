@@ -1,5 +1,6 @@
 package com.epam.coderunner.runners;
 
+import com.epam.coderunner.model.CompiledTask;
 import com.epam.coderunner.model.Status;
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.model.TestingStatusBuilder;
@@ -14,28 +15,29 @@ final class SolutionChecker {
 
     private SolutionChecker(){}
 
-    static TestingStatus checkSolution(final Map<String, String> inputOutputs,
-                                       final Function<String, String> function) {
+    static TestingStatus checkSolution(final CompiledTask compiledTask) {
+        final Map<String, String> inputOutputs = compiledTask.getInputOutputs();
+        final Function<String, String> function = compiledTask.getFunction();
+
         final TestingStatusBuilder testingStatusBuilder = TestingStatus.builder();
         try {
             boolean allTestsPassed = true;
-            for (Map.Entry<String, String> entry : inputOutputs.entrySet()) {
+            for (final Map.Entry<String, String> entry : inputOutputs.entrySet()) {
                 final String input = entry.getKey();
                 final String expected = entry.getValue();
                 final String actual = function.apply(input);
                 if (!actual.equals(expected)) {
-                    testingStatusBuilder.addStatus(Status.FAIL);
+                    testingStatusBuilder.addStatus(Status.FAIL).setCurrentFailedInputIfAbsent(input);
                     allTestsPassed = false;
-                    LOG.info("Failed on test [{}]. Expected: [{}], actual: [{}]", input, expected, actual);
+                    LOG.trace("{}Failed on test [{}]. Expected: [{}], actual: [{}]", compiledTask.signature(), input, expected, actual);
                 } else {
                     testingStatusBuilder.addStatus(Status.PASS);
                 }
             }
-            testingStatusBuilder.setAllTestsDone(true);
-            testingStatusBuilder.setAllTestsPassed(allTestsPassed);
-            LOG.info("Submission id is checked. All tests passed: {}", allTestsPassed);
-        } catch (Throwable th){
-            LOG.error("Error while checking", th);
+            testingStatusBuilder.setAllTestsDone(true).setAllTestsPassed(allTestsPassed);
+            LOG.debug("{}Task checked. All tests passed: {}", compiledTask.signature(), allTestsPassed);
+        } catch (final Throwable th){
+            LOG.warn("{}Error while checking solution:", compiledTask.signature(), th);
         }
         return testingStatusBuilder.build();
     }

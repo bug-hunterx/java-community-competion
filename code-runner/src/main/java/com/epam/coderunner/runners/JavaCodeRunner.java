@@ -1,5 +1,6 @@
 package com.epam.coderunner.runners;
 
+import com.epam.coderunner.model.CompiledTask;
 import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TaskRequest;
 import com.epam.coderunner.model.TestingStatus;
@@ -36,20 +37,21 @@ final class JavaCodeRunner implements CodeRunner {
         final String userId = taskRequest.getUserId();
         final String sourceCode = taskRequest.getSource();
         final String className = "LoadedClass" + classId.getAndIncrement();
-        LOG.debug("Begin to compile task source, taskId={}, userId={}, classId={}, source:\n{}",
-                taskId, userId, classId.get(), sourceCode);
-        final Function<String, String> function;
-        final Task task;
+        final String signature = taskRequest.signature();
+        LOG.debug("{}Begin to compile task source, classId={}, source:\n{}", signature, classId.get(), sourceCode);
+        final CompiledTask compiledTask;
         try {
-            function = RuntimeCodeCompiler.compile(className, sourceCode);
-            task = checkNotNull(taskStorage.getTask(taskId), "No task[id:%s] found", taskId);
+            final Function<String, String> function = RuntimeCodeCompiler.compile(className, sourceCode);
+            final Task task = checkNotNull(taskStorage.getTask(taskId), "No task[id:%s] found", taskId);
+            compiledTask = new CompiledTask(userId, taskId, task.getAcceptanceTests(), function);
         } catch (final Exception e) {
-            LOG.error("Error while preparing task, taskId={}, userId={}, error:", taskId, userId, e);
+            LOG.error("{}Error while preparing task:", signature, e);
             return Mono.just(TestingStatus.error(e));
         }
-        LOG.debug("Source compiled, task fetched, start scheduling tests..");
-        return taskExecutor.submit(() -> SolutionChecker.checkSolution(task.getAcceptanceTests(), function))
-                .doOnSuccess(r -> LOG.debug("Testing completed, taskId={}, userId={}, result:{}", taskId, userId, r.toJson()))
-                .doOnError(e -> LOG.debug("Testing failed, taskId={}, userId={}, error:", taskId, userId, e));
+        LOG.debug("{}Source compiled, task fetched, start scheduling tests..", signature);
+
+        return taskExecutor.submit(() -> SolutionChecker.checkSolution(compiledTask))
+                .doOnSuccess(r -> LOG.debug("{}Testing completed, result:{}", signature, r.toJson()))
+                .doOnError(e -> LOG.debug("{}Testing failed, error:", signature, e));
     }
 }
