@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 
 @Service
-final class RedisTasksStorage implements TasksStorage {
+final class RedisTaskStorage implements TaskStorage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RedisTasksStorage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RedisTaskStorage.class);
 
     private final Jedis jedis;
 
-    RedisTasksStorage(@Value("${redis.host}") final String redisHost){
+    RedisTaskStorage(@Value("${redis.host}") final String redisHost){
         LOG.debug("Redis host: {}", redisHost);
         jedis = new Jedis(redisHost);
     }

@@ -3,7 +3,7 @@ package com.epam.coderunner;
 import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TaskRequest;
 import com.epam.coderunner.model.TestingStatus;
-import com.epam.coderunner.storage.TasksStorage;
+import com.epam.coderunner.storage.TaskStorage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import org.junit.Before;
@@ -31,19 +31,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureWebTestClient
 public class CodeRunnerApplicationTests {
 
+
     @Autowired private WebTestClient webTestClient;
-    @Autowired private TasksStorage tasksStorage;
+    @Autowired private TaskStorage taskStorage;
 
     @Before
     public void setup() {
-        if (tasksStorage.getTask(1) == null) {
+        if (taskStorage.getTask(1) == null) {
             final Map<String, String> inOut = ImmutableMap.of(
                     "1", "1",
                     "21", "21"
             );
             final Task task = new Task();
             task.setAcceptanceTests(inOut);
-            tasksStorage.saveTask(1, task);
+            taskStorage.saveTask(1, task);
         }
     }
 
@@ -75,13 +76,14 @@ public class CodeRunnerApplicationTests {
                 .exchange()
                 .returnResult(String.class).getResponseBody();
 
-        System.out.println(result.last().block());
-        //assertThat(result.getResponse().getContentAsString()).contains("ERROR: No task");
+        final TestingStatus testingStatus = InternalUtils.fromJson(result.last().block(), TestingStatus.class);
+        assertThat(testingStatus.getErrorType()).isEqualTo("java.lang.NullPointerException");
+        assertThat(testingStatus.getErrorMsg()).contains("No task");
     }
 
     private static TaskRequest readTask(final int taskId) throws IOException {
         final TaskRequest taskRequest = new TaskRequest();
-        taskRequest.setTaskId(1);
+        taskRequest.setTaskId(taskId);
         taskRequest.setUserId("user2@epam.com");
         final String source =
                 Resources.toString(Resources.getResource("Solution" + taskId + ".java"), StandardCharsets.UTF_8);

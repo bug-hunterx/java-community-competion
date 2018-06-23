@@ -3,23 +3,26 @@ package com.epam.coderunner.runners;
 import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TaskRequest;
 import com.epam.coderunner.model.TestingStatus;
-import com.epam.coderunner.storage.TasksStorage;
+import com.epam.coderunner.storage.TaskStorage;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import static com.epam.coderunner.model.Status.FAIL;
 import static com.epam.coderunner.model.Status.PASS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class JavaCodeRunnerTest {
 
-    private final TasksStorage tasksStorage = mock(TasksStorage.class);
+    private final TaskStorage taskStorage = mock(TaskStorage.class);
+    private final TaskExecutor taskExecutor = mock(TaskExecutor.class);
 
     private static final String code = "" +
             "import java.util.function.Function;\n" +
@@ -32,7 +35,7 @@ public class JavaCodeRunnerTest {
             "    }\n" +
             "}";
 
-    private final JavaCodeRunner testee = new JavaCodeRunner(tasksStorage, 1);
+    private final JavaCodeRunner testee = new JavaCodeRunner(taskExecutor, taskStorage);
 
     @Before
     public void setup(){
@@ -43,7 +46,12 @@ public class JavaCodeRunnerTest {
         );
         final Task task = new Task();
         task.setAcceptanceTests(inOut);
-        doReturn(task).when(tasksStorage).getTask(1);
+        doReturn(task).when(taskStorage).getTask(1);
+
+        when(taskExecutor.submit(any())).thenAnswer(invocationOnMock -> {
+            final Callable<TestingStatus> callable = invocationOnMock.getArgument(0);
+            return Mono.fromCallable(callable);
+        });
     }
 
     @Test
@@ -54,10 +62,12 @@ public class JavaCodeRunnerTest {
         taskRequest.setSource(code);
 
         final TestingStatus result = testee.run(taskRequest).block(Duration.ofSeconds(1));
+
+        verify(taskStorage).getTask(1);
+
         assertThat(result).isNotNull();
         assertThat(result.isAllTestsDone()).isTrue();
         assertThat(result.isAllTestsPassed()).isFalse();
-
         assertThat(result.getTestsStatuses()).containsExactly(PASS, PASS, FAIL);
     }
 }

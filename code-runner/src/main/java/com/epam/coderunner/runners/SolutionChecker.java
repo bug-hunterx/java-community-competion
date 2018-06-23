@@ -2,6 +2,7 @@ package com.epam.coderunner.runners;
 
 import com.epam.coderunner.model.Status;
 import com.epam.coderunner.model.TestingStatus;
+import com.epam.coderunner.model.TestingStatusBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ final class SolutionChecker {
 
     static TestingStatus checkSolution(final Map<String, String> inputOutputs,
                                        final Function<String, String> function) {
-        final TestingStatus testingStatus = new TestingStatus();
+        final TestingStatusBuilder testingStatusBuilder = TestingStatus.builder();
         try {
             boolean allTestsPassed = true;
             for (Map.Entry<String, String> entry : inputOutputs.entrySet()) {
@@ -23,19 +24,19 @@ final class SolutionChecker {
                 final String expected = entry.getValue();
                 final String actual = function.apply(input);
                 if (!actual.equals(expected)) {
-                    testingStatus.addStatus(Status.FAIL);
+                    testingStatusBuilder.addStatus(Status.FAIL);
                     allTestsPassed = false;
                     LOG.info("Failed on test [{}]. Expected: [{}], actual: [{}]", input, expected, actual);
                 } else {
-                    testingStatus.addStatus(Status.PASS);
+                    testingStatusBuilder.addStatus(Status.PASS);
                 }
             }
-            testingStatus.setAllTestsDone(true);
-            testingStatus.setAllTestsPassed(allTestsPassed);
+            testingStatusBuilder.setAllTestsDone(true);
+            testingStatusBuilder.setAllTestsPassed(allTestsPassed);
             LOG.info("Submission id is checked. All tests passed: {}", allTestsPassed);
         } catch (Throwable th){
             LOG.error("Error while checking", th);
         }
-        return testingStatus;
+        return testingStatusBuilder.build();
     }
 }
