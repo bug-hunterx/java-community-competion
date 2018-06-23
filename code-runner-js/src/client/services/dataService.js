@@ -1,24 +1,22 @@
-const fetchTaskData = function(taskId) {
-  //should get it from redis
-  return {
-      'title': `Task${taskId}`,
-      'description': 'Testing Sum',
-      'testExamples': {
-          '1': '1',
-          '1,2,3': '6'
-      },
-      'acceptanceTests': {
-          '1,2,3,4,5,6' : '21'
-      }
-  }
-};
+import showdown from 'showdown';
+import axios from 'axios';
 
-const fetchTasksListForUser = (userId) => {
-  return ['task1', 'task2']
-};
+const converter = new showdown.Converter();
 
+const fetchTaskData = taskId => axios.get(`/api/tasks/${taskId}`)
+  .then((res) => {
+    const task = res.data;
+    task.htmlDesc = converter.makeHtml(task.longDesc);
+    return task;
+  })
+  .catch(e => console.log(e));
+
+
+const fetchTasksListForUser = () => axios.get('/api/tasks')
+  .then(res => res.data)
+  .catch(e => console.log(e));
 
 export {
-    fetchTaskData,
-    fetchTasksListForUser
-}
+  fetchTaskData,
+  fetchTasksListForUser,
+};

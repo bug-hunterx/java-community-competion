@@ -9,8 +9,8 @@ module.exports = function(environment, options) {
 
     return {
         entry: {
+            babelPolyfill: 'babel-polyfill',
             app: './src/client/app.js',
-            login: './src/client/login.js'
         },
         output: {
             path: path.resolve(__dirname, 'dist/public'),
@@ -29,37 +29,29 @@ module.exports = function(environment, options) {
                     }
                 },
                 {
-                    test: /\.css$/,
+                    test: /\.css$/i,
                     use: [
-                    MiniCssExtractPlugin.loader,
-                    "css-loader"
+                        MiniCssExtractPlugin.loader,
+                        'css-loader'
                     ]
                 }
             ]
         },
         resolve: {
-            extensions: ['.js', '.jsx']
+            extensions: ['.js', '.jsx', '.css']
         },
         plugins: [
             new HtmlWebpackPlugin({
                 title: 'Competition',
                 hash: true,
                 template: './src/client/index.html',
-                chunks: ['app'],
+                chunks: ['babelPolyfill', 'app'],
                 filename: './index.html'
             }),
-            new HtmlWebpackPlugin({
-                title: 'Login Page',
-                hash: true,
-                template: './src/client/login.html',
-                chunks: ['login'],
-                filename: './login.html'
-            }),
             new MiniCssExtractPlugin({
-                // Options similar to the same options in webpackOptions.output
-                // both options are optional
-                filename: "style.css"
-              })
+                filename: "[name].css",
+                chunkFilename: "[id].css"
+             })
         ],
         watch: true
     };

@@ -1,41 +1,56 @@
 import React, {Component} from "react"
+import Task from './TaskItem'
+import TaskDetails from './TaskPage'
+import { fetchTaskData, fetchTasksListForUser } from '../services/dataService';
 import { Link } from "react-router-dom";
-import axios from 'axios';
-
 
 export default class extends Component {
-
-    constructor(props){
-        super(props);
-        this.state = {
-            tasks: []
-        }
+    state = {
+        tasks: [],
+        currentTaskId: null
     }
 
     componentDidMount(){
-        axios.get('/api/tasks')
-            .then(res => {
-                this.setState({...this.state, tasks: res.data.tasks })
-            })
-            .catch(err => {
-                console.log(err);
-            })
+        const tasks = fetchTasksListForUser()
+        tasks.then(tasks => this.setState({tasks}))
+            .catch(e => console.log(e))
+
     }
 
+    _showTaskDetails = (id) => {
+        this.setState({currentTaskId: id})
+    }
 
     render(){
-
-        const list = this.state.tasks.map(task => <li><Link to={`/task/${task.id}`}>{task.title}</Link></li> )
+        const list = this.state.tasks.map((task, i) =>
+            <Link to={`/task/${task.id}`}>
+                    <Task
+                    key={`${task.id}-${i}`}
+                    id={task.id}
+                    title={task.title}
+                    submitted={task.submitted}
+                />
+            </Link>
+            )
         return (
             <div>
-                <ul>
-                    <div>Current location: {this.props.location.path}</div>
-
+                <div className="row header">
+                    <div className="col-lg-12">
+                        <h2>Treasure hunt</h2>
+                        <div><Link to="/dashboard">Dashboard</Link></div>
+                    </div>
+                </div>
+                <hr/>
+                <div className="row">
                     {list}
-                </ul>
-                <div><Link to="/dashboard">Dashboard</Link></div>
+                </div>     
+                <hr/>      
+                {/*<div className="row">*/}
+                    {/*<div className="col-lg-12">*/}
+                        {/*{this.state.currentTaskId ? <TaskDetails taskId={this.state.currentTaskId} /> : <h2>Click on the task to see details</h2>}    */}
+                    {/*</div>*/}
+                {/*</div>*/}
             </div>
-
         )
     }
 }

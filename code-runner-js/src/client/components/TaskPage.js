@@ -1,40 +1,44 @@
 import React, {Component} from "react"
 import { fetchTaskData } from '../services/dataService';
+import UploadForm from './FileUpload';
 
-class TaskPage extends React.Component {
+class TaskDetails extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            taskId: props.match.params.taskId
-        }
+    state = {
+        task: null
     }
 
-    componentDidMount(){
-        let task = fetchTaskData(this.state.taskId);
+    componentDidMount() {
+        fetchTaskData(this.props.match.params.taskId)
+            .then(task => this.setState({task}) )
+            .catch(e => console.log(e))
 
-        let newState = {...this.state, task};
-        console.log('new state: ', newState);
-        this.setState(newState);
     }
+    //
+    // componentWillReceiveProps(nextProps){
+    //     if (!nextProps.taskId) return
+    //     fetchTaskData(nextProps.taskId)
+    //         .then(task => this.setState({task}))
+    //         .catch(e => console.log(e))
+    // }
 
     render() {
-        let task = this.state.task;
-        if(task) {
-            return (
-                <div>
-                    <div>{task.title}</div>
-                    <form onSubmit={this.onFormSubmit}>
-                        <h1>File Upload</h1>
-                        <input type="file" onChange={this.onChange}/>
-                        <button type="submit">Upload</button>
-                    </form>
-                </div>
-            )
-        } else {
-            return <div></div>;
-        }
+        let task = this.state.task
+        return (
+            <div className='row'>
+                {task && <div className='col-lg-12'>
+                    <div className="card">
+                        <div className="card-header">
+                            {task.title}
+                        </div>
+                        <p dangerouslySetInnerHTML={{__html:task.htmlDesc}}></p>
+                    </div>
+                    <div>
+                        <UploadForm taskId={this.props.match.params.taskId}/>
+                    </div>
+                </div>}
+            </div>)
     }
 }
 
-export default TaskPage;
+export default TaskDetails;
