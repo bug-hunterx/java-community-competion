@@ -17,7 +17,7 @@ public class TaskExecutorImplTest {
     private static final TaskExecutorImpl taskExecutor = new TaskExecutorImpl(1000);
 
     @AfterClass
-    public static void dispose(){
+    public static void dispose() {
         taskExecutor.dispose();
     }
 
@@ -34,12 +34,22 @@ public class TaskExecutorImplTest {
     @Rule public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void timeoutTaskShouldBeCanceled(){
+    public void timeoutTaskShouldBeCanceled() {
         final Callable<TestingStatus> task = () -> {
             while (true) {}
         };
 
         thrown.expectMessage("Timeout");
         taskExecutor.submit(task).block(Duration.ofSeconds(1));
+    }
+
+    @Test
+    public void errorThrown() {
+        final Callable<TestingStatus> task = this::infiniteRecursion;
+        thrown.expectMessage("TimeoutException");
+        taskExecutor.submit(task).block(Duration.ofSeconds(2));
+    }
+    private TestingStatus infiniteRecursion() {
+        return infiniteRecursion();
     }
 }
