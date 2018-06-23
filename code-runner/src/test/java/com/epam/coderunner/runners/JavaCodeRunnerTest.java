@@ -1,5 +1,6 @@
 package com.epam.coderunner.runners;
 
+import com.epam.coderunner.TestData;
 import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TaskRequest;
 import com.epam.coderunner.model.TestingStatus;
@@ -21,9 +22,6 @@ import static org.mockito.Mockito.*;
 
 public final class JavaCodeRunnerTest {
 
-    private final TaskStorage taskStorage = mock(TaskStorage.class);
-    private final TaskExecutor taskExecutor = mock(TaskExecutor.class);
-
     private static final String code = "" +
             "import java.util.function.Function;\n" +
             "\n" +
@@ -35,8 +33,10 @@ public final class JavaCodeRunnerTest {
             "    }\n" +
             "}";
 
-    private final RuntimeCodeCompiler codeCompiler = new RuntimeCodeCompiler(new SourceCodeGuard());
-    private final JavaCodeRunner testee = new JavaCodeRunner(taskExecutor, taskStorage, codeCompiler);
+    private final TaskStorage taskStorage = mock(TaskStorage.class);
+    private final TaskExecutor taskExecutor = mock(TaskExecutor.class);
+    private final JavaCodeRunner testee =
+            new JavaCodeRunner(taskExecutor, taskStorage, new SourceCodeGuard(), new RuntimeCodeCompiler());
 
     @Before
     public void setup(){
@@ -48,6 +48,7 @@ public final class JavaCodeRunnerTest {
         final Task task = new Task();
         task.setAcceptanceTests(inOut);
         doReturn(task).when(taskStorage).getTask(1);
+        doReturn(task).when(taskStorage).getTask(3);
 
         when(taskExecutor.submit(any())).thenAnswer(invocationOnMock -> {
             final Callable<TestingStatus> callable = invocationOnMock.getArgument(0);
@@ -71,5 +72,14 @@ public final class JavaCodeRunnerTest {
         assertThat(result.isAllTestsPassed()).isFalse();
         assertThat(result.getTestsStatuses()).containsExactly(PASS, PASS, FAIL);
         assertThat(result.getCurrentFailedInput()).isEqualTo("asdasd, asdads");
+    }
+
+    @Test
+    public void sourceWithPackageShouldCompileAndRun(){
+        final TaskRequest taskRequest = TestData.readTaskFromResources(3);
+
+        final TestingStatus result = testee.run(taskRequest).block(Duration.ofSeconds(1));
+        assertThat(result).isNotNull();
+        assertThat(result.getTestsStatuses()).containsExactly(FAIL, FAIL, FAIL);
     }
 }

@@ -1,6 +1,6 @@
 import java.util.function.Function;
 
-public class Solution1 implements Function<String, String> {
+final class Solution1 implements Function<String, String> {
 
     @Override
     public String apply(String s) {

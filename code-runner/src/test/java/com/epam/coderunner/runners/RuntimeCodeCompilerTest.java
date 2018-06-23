@@ -1,6 +1,7 @@
 package com.epam.coderunner.runners;
 
 import com.epam.coderunner.TestData;
+import com.epam.coderunner.model.SourceCode;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,30 +9,27 @@ import org.junit.rules.ExpectedException;
 
 import java.util.function.Function;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 public final class RuntimeCodeCompilerTest {
 
-    private final SourceCodeGuard sourceCodeGuard = mock(SourceCodeGuard.class);
-    private final RuntimeCodeCompiler codeCompiler = new RuntimeCodeCompiler(sourceCodeGuard);
+    private final RuntimeCodeCompiler codeCompiler = new RuntimeCodeCompiler();
 
     @Before
     public void setup(){
-        when(sourceCodeGuard.check(anyString()))
-                .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
-        when(sourceCodeGuard.renameClass(anyString(), anyString()))
-                .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
+
     }
 
     @Rule public ExpectedException thrown = ExpectedException.none();
 
     @Test
+    public void compileWithPackage(){
+        final String source = TestData.readTaskFromResources(3).getSource();
+        codeCompiler.compile(new SourceCode("com.github.someone.Solution3", source));
+    }
+
+    @Test
     public void badSourceCode() {
         thrown.expect(org.joor.ReflectException.class);
-        codeCompiler.compile("asdf", "bullshit");
+        codeCompiler.compile(new SourceCode("SomeClass","bullshit"));
     }
 
     @Test
@@ -39,7 +37,7 @@ public final class RuntimeCodeCompilerTest {
         final String source = TestData.readTaskFromResources(1).getSource();
 
         for (int i = 0; i < 100000; i++) {
-           final Function<String, String> function = codeCompiler.compile("Solution1", source);
+           final Function<String, String> function = codeCompiler.compile(new SourceCode("Solution1", source));
            function.apply("someInput");
         }
     }

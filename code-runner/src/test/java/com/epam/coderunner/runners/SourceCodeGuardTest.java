@@ -4,6 +4,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public final class SourceCodeGuardTest {
 
     private static final String NEW_LINE = System.lineSeparator();
@@ -17,26 +19,28 @@ public final class SourceCodeGuardTest {
                 .append("System.exit(0);")
                 .append("}").toString();
         thrown.expectMessage("keyword");
-        sourceCodeGuard.check(source);
+        sourceCodeGuard.proguard(source);
     }
 
     @Test
     public void classNameDoesNotConform(){
         final String source = "public class BadName{}";
         thrown.expectMessage("Class name");
-        sourceCodeGuard.check(source);
+        sourceCodeGuard.proguard(source);
     }
 
     @Test
-    public void classNameShouldBeReplaced(){
+    public void contentProgarded(){
         final String source = new StringBuilder()
+                .append("package com.github.someone;").append(NEW_LINE)
                 .append("class Solution1{").append(NEW_LINE)
                 .append("  void test(int n){").append(NEW_LINE)
                 .append("    System.out.println(n);").append(NEW_LINE)
                 .append("  }").append(NEW_LINE)
                 .append("}").append(NEW_LINE)
                 .toString();
-        final String indexedSource = sourceCodeGuard.renameClass(source, "SomeName");
-        System.out.println(indexedSource);
+        final String indexedSource = sourceCodeGuard.proguard(source).getCode();
+        assertThat(indexedSource).contains("LoadedClass");
+        assertThat(indexedSource).doesNotContain("package");
     }
 }
