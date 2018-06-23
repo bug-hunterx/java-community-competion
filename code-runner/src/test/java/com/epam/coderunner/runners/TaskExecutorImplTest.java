@@ -42,7 +42,4 @@ public class TaskExecutorImplTest {
         thrown.expectMessage("Timeout");
         taskExecutor.submit(task).block(Duration.ofSeconds(1));
     }
-
-
-
 }

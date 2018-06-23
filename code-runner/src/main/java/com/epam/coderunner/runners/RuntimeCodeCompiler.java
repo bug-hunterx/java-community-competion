@@ -22,7 +22,7 @@ final class RuntimeCodeCompiler {
     <T> T compile(final String className, final String source){
         final String checkedSource = codeGuard.check(source);
         final Object obj = Reflect.compile(className, codeGuard.renameClass(checkedSource, className)).create().get();
-        LOG.debug("Source code has type of {}", obj.getClass());
+        LOG.trace("Source code has type of {}", obj.getClass());
         return (T) obj;
     }
 }

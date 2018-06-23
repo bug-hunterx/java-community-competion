@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class JavaCodeRunnerTest {
+public final class JavaCodeRunnerTest {
 
     private final TaskStorage taskStorage = mock(TaskStorage.class);
     private final TaskExecutor taskExecutor = mock(TaskExecutor.class);
@@ -72,6 +72,4 @@ public class JavaCodeRunnerTest {
         assertThat(result.getTestsStatuses()).containsExactly(PASS, PASS, FAIL);
         assertThat(result.getCurrentFailedInput()).isEqualTo("asdasd, asdads");
     }
-
-
 }
