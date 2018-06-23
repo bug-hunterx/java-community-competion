@@ -9,6 +9,8 @@ import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 public class CodeRunnerApplicationTests {
-
+    private static final Logger LOG = LoggerFactory.getLogger(CodeRunnerApplicationTests.class);
 
     @Autowired private WebTestClient webTestClient;
     @Autowired private TaskStorage taskStorage;
@@ -51,7 +53,7 @@ public class CodeRunnerApplicationTests {
     @Test
     public void runTask() throws Exception {
         final String taskJson = InternalUtils.toJson(readTask(1));
-
+        LOG.info("Request specs:{}", taskJson);
         final Flux<String> result = webTestClient
                 .post().uri("task/submit")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -62,6 +64,7 @@ public class CodeRunnerApplicationTests {
 
         final String response = result.blockFirst();
         assertThat(response).isNotEmpty();
+        LOG.info("Response specs:{}", response);
         final TestingStatus testingStatus = InternalUtils.fromJson(response, TestingStatus.class);
 
         assertThat(testingStatus.getTestsStatuses()).containsExactly(FAIL, PASS);
