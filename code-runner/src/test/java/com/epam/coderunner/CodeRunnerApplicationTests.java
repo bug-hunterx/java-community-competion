@@ -75,10 +75,10 @@ public class CodeRunnerApplicationTests {
                 .exchange()
                 .returnResult(String.class).getResponseBody();
 
-        final String response = result.blockFirst();
+        final String response = result.blockFirst(Duration.ofSeconds(2));
         assertThat(response).isNotEmpty();
         LOG.info("Response specs:{}", response);
-        final TestingStatus testingStatus = InternalUtils.fromJson(response, TestingStatus.class);
+        final TestingStatus testingStatus = TestingStatus.fromJson(response);
 
         assertThat(testingStatus.getTestsStatuses()).containsExactly(FAIL, PASS);
     }

@@ -2,19 +2,24 @@ package com.epam.coderunner.runners;
 
 import com.epam.coderunner.model.Status;
 import com.epam.coderunner.model.TestingStatus;
+import org.junit.AfterClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TaskExecutorImplTest {
 
-    private final TaskExecutor taskExecutor = new TaskExecutorImpl(1000);
+    private static final TaskExecutorImpl taskExecutor = new TaskExecutorImpl(1000);
+
+    @AfterClass
+    public static void dispose(){
+        taskExecutor.dispose();
+    }
 
     @Test
     public void passThrough() {
