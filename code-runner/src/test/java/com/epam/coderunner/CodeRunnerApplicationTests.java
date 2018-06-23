@@ -1,11 +1,9 @@
 package com.epam.coderunner;
 
 import com.epam.coderunner.model.Task;
-import com.epam.coderunner.model.TaskRequest;
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TaskStorage;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Resources;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -22,8 +20,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +62,7 @@ public class CodeRunnerApplicationTests {
 
     @Test
     public void runTask() {
-        final String taskJson = InternalUtils.toJson(readTask(1));
+        final String taskJson = InternalUtils.toJson(TestData.readTaskFromResources(1));
         LOG.info("Request specs:{}", taskJson);
         final Flux<String> result = webTestClient
                 .post().uri("task/submit")
@@ -88,7 +84,7 @@ public class CodeRunnerApplicationTests {
         final Flux<String> result = webTestClient
                 .post().uri("task/submit")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromObject(InternalUtils.toJson(readTask(9999))))
+                .body(BodyInserters.fromObject(InternalUtils.toJson(TestData.readTaskFromResources(9999))))
                 .exchange()
                 .returnResult(String.class).getResponseBody();
         final String response = result.blockFirst(Duration.ofSeconds(2));
@@ -106,7 +102,7 @@ public class CodeRunnerApplicationTests {
                     executor.submit(() -> webTestClient
                             .post().uri("task/submit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .body(BodyInserters.fromObject(InternalUtils.toJson(readTask(2))))
+                            .body(BodyInserters.fromObject(InternalUtils.toJson(TestData.readTaskFromResources(2))))
                             .exchange()
                             .returnResult(String.class).getResponseBody()
                     )
@@ -122,19 +118,5 @@ public class CodeRunnerApplicationTests {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    private static TaskRequest readTask(final int taskId) {
-        final TaskRequest taskRequest = new TaskRequest();
-        taskRequest.setTaskId(taskId);
-        taskRequest.setUserId("user2@epam.com");
-        final String source;
-        try {
-            source = Resources.toString(Resources.getResource("Solution" + taskId + ".java"), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        taskRequest.setSource(source);
-        return taskRequest;
     }
 }

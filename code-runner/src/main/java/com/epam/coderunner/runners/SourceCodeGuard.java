@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 
 @Component
-final class SourceCodeGuard {
+class SourceCodeGuard {
 
     private static final List<String> keywordBlacklist = readBlacklist();
     private static final Pattern classNamePattern = Pattern.compile("(?s)(.*class\\s+)Solution[0-9]+(\\b.*)");
