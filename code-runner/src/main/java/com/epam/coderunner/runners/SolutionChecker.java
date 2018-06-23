@@ -18,19 +18,21 @@ final class SolutionChecker {
     static TestingStatus checkSolution(final CompiledTask compiledTask) {
         final Map<String, String> inputOutputs = compiledTask.getInputOutputs();
         final Function<String, String> function = compiledTask.getFunction();
-
         final TestingStatusBuilder testingStatusBuilder = TestingStatus.builder();
+        LOG.debug("{}Start testing task solution..", compiledTask.signature());
         try {
             boolean allTestsPassed = true;
             for (final Map.Entry<String, String> entry : inputOutputs.entrySet()) {
                 final String input = entry.getKey();
                 final String expected = entry.getValue();
+                LOG.debug("{}Start checking.., input[{}], expected[{}]", compiledTask.signature(), input, expected);
                 final String actual = function.apply(input);
                 if (!actual.equals(expected)) {
+                    LOG.trace("{}Failed on test [{}]. Expected: [{}], actual: [{}]", compiledTask.signature(), input, expected, actual);
                     testingStatusBuilder.addStatus(Status.FAIL).setCurrentFailedInputIfAbsent(input);
                     allTestsPassed = false;
-                    LOG.trace("{}Failed on test [{}]. Expected: [{}], actual: [{}]", compiledTask.signature(), input, expected, actual);
                 } else {
+                    LOG.trace("{}Succeeded on test [{}].", compiledTask.signature(), input);
                     testingStatusBuilder.addStatus(Status.PASS);
                 }
             }
