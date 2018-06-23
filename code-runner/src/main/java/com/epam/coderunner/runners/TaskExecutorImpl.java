@@ -26,8 +26,7 @@ final class TaskExecutorImpl implements TaskExecutor {
     public Mono<TestingStatus> submit(final Callable<TestingStatus> task) {
         return Mono.fromCallable(task)
                 .publishOn(scheduler)
-                .timeout(Duration.ofMillis(taskTimeoutMs))
-                .onErrorResume(e -> Mono.just(TestingStatus.error(e)));
+                .timeout(Duration.ofMillis(taskTimeoutMs));
     }
 
     private static Scheduler provideScheduler() {
