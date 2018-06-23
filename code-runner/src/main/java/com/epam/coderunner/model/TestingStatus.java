@@ -1,13 +1,12 @@
 package com.epam.coderunner.model;
 
-import com.google.gson.Gson;
+import com.epam.coderunner.InternalUtils;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
-public class TestingStatus {
+public final class TestingStatus {
 
-    private static final Gson gson = new Gson();
     private Collection<Status> testsStatuses = new LinkedList<>();
     private boolean allTestsDone = false;
     private boolean allTestsPassed = false;
@@ -41,6 +40,6 @@ public class TestingStatus {
     }
 
     public String toJson(){
-        return gson.toJson(this);
+        return InternalUtils.toJson(this);
     }
 }

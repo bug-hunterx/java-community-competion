@@ -6,7 +6,6 @@ import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TasksStorage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
-import com.google.gson.Gson;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,8 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureWebTestClient
 public class CodeRunnerApplicationTests {
 
-    private final Gson gson = new Gson();
-
     @Autowired private WebTestClient webTestClient;
     @Autowired private TasksStorage tasksStorage;
 
@@ -52,10 +49,10 @@ public class CodeRunnerApplicationTests {
 
     @Test
     public void runTask() throws Exception {
-        final String taskJson = gson.toJson(readTask(1));
+        final String taskJson = InternalUtils.toJson(readTask(1));
 
         final Flux<String> result = webTestClient
-                .post().uri("task/1")
+                .post().uri("task/submit")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromObject(taskJson))
                 .exchange()
@@ -64,7 +61,7 @@ public class CodeRunnerApplicationTests {
 
         final String response = result.blockFirst();
         assertThat(response).isNotEmpty();
-        final TestingStatus testingStatus = gson.fromJson(response, TestingStatus.class);
+        final TestingStatus testingStatus = InternalUtils.fromJson(response, TestingStatus.class);
 
         assertThat(testingStatus.getTestsStatuses()).containsExactly(FAIL, PASS);
     }
@@ -72,9 +69,9 @@ public class CodeRunnerApplicationTests {
     @Test
     public void noTask() throws Exception {
         final Flux<String> result = webTestClient
-                .post().uri("task/9999")
+                .post().uri("task/submit")
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromObject(gson.toJson(readTask(9999))))
+                .body(BodyInserters.fromObject(InternalUtils.toJson(readTask(9999))))
                 .exchange()
                 .returnResult(String.class).getResponseBody();
 
@@ -84,6 +81,8 @@ public class CodeRunnerApplicationTests {
 
     private static TaskRequest readTask(final int taskId) throws IOException {
         final TaskRequest taskRequest = new TaskRequest();
+        taskRequest.setTaskId(1);
+        taskRequest.setUserId("user2@epam.com");
         final String source =
                 Resources.toString(Resources.getResource("Solution" + taskId + ".java"), StandardCharsets.UTF_8);
         taskRequest.setSource(source);

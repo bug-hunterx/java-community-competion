@@ -10,20 +10,20 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
-final class FileUploadController {
-    private static final Logger LOG = LoggerFactory.getLogger(FileUploadController.class);
+final class TaskController {
+    private static final Logger LOG = LoggerFactory.getLogger(TaskController.class);
 
     private final CodeRunner runner;
 
     @Autowired
-    public FileUploadController(final CodeRunner runner) {
+    public TaskController(final CodeRunner runner) {
         this.runner = runner;
     }
 
-    @PostMapping("/task/{taskId}")
-    public @ResponseBody Mono<String> handleFileUpload(@PathVariable long taskId, @RequestBody TaskRequest code){
-            LOG.debug("Running code {}", code.getSource());
-            return runner.run(taskId, code.getSource()).map(TestingStatus::toJson);
+    @PostMapping("/task/submit")
+    @ResponseBody
+    public Mono<String> handleFileUpload(@RequestBody final TaskRequest request) {
+        LOG.info("Received task request, taskId={}, userId={}", request.getTaskId(), request.getUserId());
+        return runner.run(request).map(TestingStatus::toJson);
     }
-
 }

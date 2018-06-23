@@ -2,7 +2,7 @@ package com.epam.coderunner.model;
 
 import java.util.Map;
 
-public class Task {
+public final class Task {
 
     private String taskTitle;
     private String taskDescription;

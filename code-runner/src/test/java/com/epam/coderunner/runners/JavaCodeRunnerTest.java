@@ -1,22 +1,21 @@
 package com.epam.coderunner.runners;
 
 import com.epam.coderunner.model.Task;
+import com.epam.coderunner.model.TaskRequest;
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TasksStorage;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.time.Duration;
 import java.util.Map;
 
 import static com.epam.coderunner.model.Status.FAIL;
 import static com.epam.coderunner.model.Status.PASS;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class JavaCodeRunnerTest {
 
@@ -49,8 +48,12 @@ public class JavaCodeRunnerTest {
 
     @Test
     public void shouldCompileAndRun() {
+        final TaskRequest taskRequest = new TaskRequest();
+        taskRequest.setTaskId(1);
+        taskRequest.setUserId("user@epam.com");
+        taskRequest.setSource(code);
 
-        final TestingStatus result = testee.run(1, code).block(Duration.ofSeconds(1));
+        final TestingStatus result = testee.run(taskRequest).block(Duration.ofSeconds(1));
         assertThat(result).isNotNull();
         assertThat(result.isAllTestsDone()).isTrue();
         assertThat(result.isAllTestsPassed()).isFalse();
