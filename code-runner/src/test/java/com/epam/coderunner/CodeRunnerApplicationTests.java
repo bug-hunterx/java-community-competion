@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 
 import static com.epam.coderunner.model.Status.FAIL;
@@ -78,8 +79,9 @@ public class CodeRunnerApplicationTests {
                 .body(BodyInserters.fromObject(InternalUtils.toJson(readTask(9999))))
                 .exchange()
                 .returnResult(String.class).getResponseBody();
-
-        final TestingStatus testingStatus = InternalUtils.fromJson(result.last().block(), TestingStatus.class);
+        final String response = result.last().block(Duration.ofSeconds(2));
+        LOG.info("Response specs:{}", response);
+        final TestingStatus testingStatus = InternalUtils.fromJson(response, TestingStatus.class);
         assertThat(testingStatus.getErrorType()).isEqualTo("java.lang.NullPointerException");
         assertThat(testingStatus.getErrorMsg()).contains("No task");
     }
