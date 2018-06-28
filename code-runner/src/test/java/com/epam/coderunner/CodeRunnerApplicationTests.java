@@ -76,7 +76,7 @@ public class CodeRunnerApplicationTests {
         LOG.info("Response specs:{}", response);
         final TestingStatus testingStatus = TestingStatus.fromJson(response);
 
-        assertThat(testingStatus.getTestsStatuses()).containsExactly(FAIL, PASS);
+        assertThat(testingStatus.getTestsStatuses()).containsExactly(PASS, PASS);
     }
 
     @Test

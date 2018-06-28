@@ -2,6 +2,7 @@ package com.epam.coderunner.model;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -9,16 +10,16 @@ public final class CompiledTask implements RequestSignature{
     private final String userId;
     private final long taskId;
     private final Map<String, String> inputOutputs;
-    private final Function<String, String> function;
+    private final Supplier<Function<String, String>> functionSupplier;
 
     public CompiledTask(final String userId,
                         final long taskId,
                         final Map<String, String> inputOutputs,
-                        final Function<String, String> function) {
+                        final Supplier<Function<String, String>> functionSupplier) {
         this.userId = userId;
         this.taskId = taskId;
         this.inputOutputs = checkNotNull(inputOutputs);
-        this.function = checkNotNull(function);
+        this.functionSupplier = checkNotNull(functionSupplier);
     }
 
     public String getUserId() {
@@ -31,6 +32,6 @@ public final class CompiledTask implements RequestSignature{
         return inputOutputs;
     }
     public Function<String, String> getFunction() {
-        return function;
+        return functionSupplier.get();
     }
 }

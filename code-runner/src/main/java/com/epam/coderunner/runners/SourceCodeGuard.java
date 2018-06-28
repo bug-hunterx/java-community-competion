@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Component
 class SourceCodeGuard {
     private static final List<String> keywordBlacklist = readBlacklist();
+    //todo: add class public check
     private static final Pattern classNamePattern = Pattern.compile("(?s)(.*class\\s+)Solution[\\d]+(\\b.*)");
     private static final Pattern packageNamePattern = Pattern.compile("(?s)\\s*package\\s+[\\w.]+;(.*)");
     private static final AtomicLong classId = new AtomicLong(1000000);
