@@ -2,6 +2,8 @@ package com.epam.coderunner.runners;
 
 import com.epam.coderunner.TestData;
 import com.epam.coderunner.model.SourceCode;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
@@ -54,5 +56,22 @@ public final class RuntimeCodeCompilerTest {
                 .append("}").toString();
         thrown.expectCause(Matchers.any(IllegalArgumentException.class));
         codeCompiler.compile(new SourceCode("BadType", source));
+    }
+
+    @Test
+    public void classMustBePublic(){ //class.newInstance() is called
+        final String source = new StringBuilder()
+                .append("class NonPublicClazz implements java.util.function.Function<String, String>{")
+                .append("public String apply(String input){return input;}")
+                .append("}").toString();
+        thrown.expectCause(new BaseMatcher<Throwable>() {
+
+            @Override public void describeTo(final Description description) {}
+            @Override public boolean matches(final Object item) {
+                final IllegalArgumentException exception = (IllegalArgumentException) item;
+                return exception.getMessage().contains("is not public");
+            }
+        });
+        codeCompiler.compile(new SourceCode("NonPublicClazz", source));
     }
 }

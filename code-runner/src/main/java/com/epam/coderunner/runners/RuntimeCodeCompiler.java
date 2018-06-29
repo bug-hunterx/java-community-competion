@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -28,7 +29,9 @@ final class RuntimeCodeCompiler extends RuntimeTypeCaptor<Function<String, Strin
                     .type();
             checkArgument(type.isSupertypeOf(clazz),
                     "Source code type[%s] is not a sub type of %s", clazz, type);
-            LOG.debug("SourceCode code has type of {}", Arrays.toString(clazz.getInterfaces()));
+            LOG.debug("Source code has type of {}", Arrays.toString(clazz.getInterfaces()));
+            checkArgument(Modifier.isPublic(clazz.getModifiers()),
+                    "Source code class[%s] is not public.", clazz);
             return () -> {
                 try {
                     return (Function<String, String>) clazz.newInstance();
