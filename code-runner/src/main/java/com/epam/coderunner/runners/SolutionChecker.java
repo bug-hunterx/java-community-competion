@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.function.Function;
 
 final class SolutionChecker {
     private static final Logger LOG = LoggerFactory.getLogger(SolutionChecker.class);

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class TestingStatusBuilder {
-    private Collection<Status> testsStatuses = new ArrayList<>(20);
+    private final Collection<Status> testsStatuses = new ArrayList<>(20);
     private boolean allTestsDone;
     private boolean allTestsPassed;
     private String currentFailedInput;

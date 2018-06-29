@@ -36,6 +36,7 @@ public class TaskExecutorImplTest {
     @Test
     public void timeoutTaskShouldBeCanceled() {
         final Callable<TestingStatus> task = () -> {
+            //noinspection InfiniteLoopStatement
             while (true) {}
         };
 

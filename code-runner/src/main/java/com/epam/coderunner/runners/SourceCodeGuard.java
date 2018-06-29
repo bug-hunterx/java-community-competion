@@ -4,7 +4,6 @@ import com.epam.coderunner.model.SourceCode;
 import com.google.common.io.Resources;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;

@@ -1,11 +1,8 @@
 package com.epam.coderunner.model;
 
 import com.epam.coderunner.InternalUtils;
-import com.google.common.base.Throwables;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 
 public final class TestingStatus {
 
