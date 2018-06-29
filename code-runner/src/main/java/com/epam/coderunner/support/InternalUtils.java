@@ -1,9 +1,11 @@
-package com.epam.coderunner;
+package com.epam.coderunner.support;
 
 import com.google.gson.Gson;
 
 public final class InternalUtils {
     private static final Gson gson = new Gson();
+
+    public static String NEWLINE = System.lineSeparator();
 
     private InternalUtils(){}
 

@@ -3,6 +3,7 @@ package com.epam.coderunner;
 import com.epam.coderunner.model.Task;
 import com.epam.coderunner.model.TestingStatus;
 import com.epam.coderunner.storage.TaskStorage;
+import com.epam.coderunner.support.InternalUtils;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.AfterClass;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
-import static com.epam.coderunner.model.Status.FAIL;
 import static com.epam.coderunner.model.Status.PASS;
 import static org.assertj.core.api.Assertions.assertThat;
 

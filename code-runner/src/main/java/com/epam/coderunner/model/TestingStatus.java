@@ -1,6 +1,6 @@
 package com.epam.coderunner.model;
 
-import com.epam.coderunner.InternalUtils;
+import com.epam.coderunner.support.InternalUtils;
 
 import java.util.Collection;
 

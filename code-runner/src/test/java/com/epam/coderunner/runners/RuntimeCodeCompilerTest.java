@@ -10,10 +10,9 @@ import org.junit.rules.ExpectedException;
 
 import java.util.function.Function;
 
-
 public final class RuntimeCodeCompilerTest {
 
-    private final RuntimeCodeCompiler<Function<String, String>> codeCompiler = new RuntimeCodeCompiler<>();
+    private final RuntimeCodeCompiler codeCompiler = new RuntimeCodeCompiler();
 
     @Before
     public void setup() {
@@ -43,5 +42,17 @@ public final class RuntimeCodeCompilerTest {
             final Function<String, String> function = codeCompiler.compile(sourceCode).get();
             function.apply("1324");
         }
+    }
+
+    @Test
+    public void sourceCodeWithWrongType(){
+        final String source = new StringBuilder()
+                .append("public class BadType implements java.util.function.Supplier<String>{")
+                .append("  public String get(){")
+                .append("    return \"someValue\";")
+                .append("  }")
+                .append("}").toString();
+        thrown.expectCause(Matchers.any(IllegalArgumentException.class));
+        codeCompiler.compile(new SourceCode("BadType", source));
     }
 }

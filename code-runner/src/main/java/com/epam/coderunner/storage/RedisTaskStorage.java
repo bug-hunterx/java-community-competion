@@ -1,6 +1,6 @@
 package com.epam.coderunner.storage;
 
-import com.epam.coderunner.InternalUtils;
+import com.epam.coderunner.support.InternalUtils;
 import com.epam.coderunner.model.Task;
 import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;

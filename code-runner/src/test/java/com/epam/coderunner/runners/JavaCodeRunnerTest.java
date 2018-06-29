@@ -36,7 +36,7 @@ public final class JavaCodeRunnerTest {
     private final TaskStorage taskStorage = mock(TaskStorage.class);
     private final TaskExecutor taskExecutor = mock(TaskExecutor.class);
     private final JavaCodeRunner testee =
-            new JavaCodeRunner(taskExecutor, taskStorage, new SourceCodeGuard(), new RuntimeCodeCompiler<>());
+            new JavaCodeRunner(taskExecutor, taskStorage, new SourceCodeGuard(), new RuntimeCodeCompiler());
 
     @Before
     public void setup(){

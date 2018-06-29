@@ -20,13 +20,13 @@ final class JavaCodeRunner implements CodeRunner {
     private final TaskExecutor taskExecutor;
     private final TaskStorage taskStorage;
     private final SourceCodeGuard sourceCodeGuard;
-    private final RuntimeCodeCompiler<Function<String, String>> codeCompiler;
+    private final RuntimeCodeCompiler codeCompiler;
 
     @Autowired
     JavaCodeRunner(final TaskExecutor taskExecutor,
                    final TaskStorage taskStorage,
                    final SourceCodeGuard sourceCodeGuard,
-                   final RuntimeCodeCompiler<Function<String, String>> codeCompiler) {
+                   final RuntimeCodeCompiler codeCompiler) {
         this.taskExecutor = taskExecutor;
         this.taskStorage = taskStorage;
         this.sourceCodeGuard = sourceCodeGuard;
