@@ -8,5 +8,5 @@ public interface TaskStorage {
     Task getTask(final long taskId);
 
     @VisibleForTesting
-    void saveTask(final long taskId, final Task task);
+    Task saveTask(final long taskId, final Task task);
 }
