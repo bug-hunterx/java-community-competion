@@ -17,19 +17,19 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /** Unloading class seems unnecessary, see related pressure test. */
 @Component
-final class RuntimeCodeCompiler extends RuntimeTypeCaptor<Function<String, String>> {
+final class RuntimeCodeCompiler {
     private static final Logger LOG = LoggerFactory.getLogger(RuntimeCodeCompiler.class);
+    private final TypeToken<Function<String, String>> type = new TypeToken<Function<String, String>>() {};
 
     @SuppressWarnings("unchecked")
     Supplier<Function<String, String>> compile(final SourceCode source) {
-        final TypeToken<Function<String, String>> type = getGenericType();
         try {
             final Class<?> clazz = Reflect.compile(source.getClassName(), source.getCode())
                     .create()
                     .type();
             checkArgument(type.isSupertypeOf(clazz),
                     "Source code type[%s] is not a sub type of %s", clazz, type);
-            LOG.debug("Source code has type of {}", Arrays.toString(clazz.getInterfaces()));
+            LOG.debug("Source code[{}] has type of {}", source.getClassName(), Arrays.toString(clazz.getInterfaces()));
             checkArgument(Modifier.isPublic(clazz.getModifiers()),
                     "Source code class[%s] is not public.", clazz);
             return () -> {

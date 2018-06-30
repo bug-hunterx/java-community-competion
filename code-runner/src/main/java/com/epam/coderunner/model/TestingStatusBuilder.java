@@ -5,7 +5,7 @@ import com.google.common.base.Throwables;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class TestingStatusBuilder {
+public final class TestingStatusBuilder {
     private final Collection<Status> testsStatuses = new ArrayList<>(20);
     private boolean allTestsDone;
     private boolean allTestsPassed;
