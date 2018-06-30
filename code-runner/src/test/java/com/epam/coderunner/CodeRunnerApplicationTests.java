@@ -100,8 +100,8 @@ public class CodeRunnerApplicationTests {
     public void longRunningTaskPressureTesting() {
         final ThreadLocalRandom random = ThreadLocalRandom.current();
         final Map<Long, Future<String>> futures = new HashMap<>(20);
-        for (int i = 0; i < 10; i++) {
-            final TaskRequest request = TestData.readTaskFromResources(random.nextInt(1,3));
+        for (int i = 0; i < 20; i++) {
+            final TaskRequest request = TestData.readTaskFromResources(random.nextInt(1, 3));
             futures.put(
                     request.getTaskId(),
                     executor.submit(() -> webTestClient
@@ -114,14 +114,14 @@ public class CodeRunnerApplicationTests {
             );
         }
         LOG.debug("All requests fired!");
-        futures.forEach((index, future )-> {
+        futures.forEach((index, future) -> {
             try {
                 final String response = future.get();
                 LOG.debug("Response:{}", response);
                 final TestingStatus testingStatus = TestingStatus.fromJson(response);
-                if(index == 2){
+                if (index == 2) {
                     assertThat(testingStatus.getErrorType()).isEqualTo(TimeoutException.class.getName());
-                }else if(index == 1){
+                } else if (index == 1) {
                     assertThat(testingStatus.getErrorType()).isNullOrEmpty();
                 }
             } catch (InterruptedException | ExecutionException e) {
