@@ -36,9 +36,10 @@ final class SolutionChecker {
             }
             testingStatusBuilder.setAllTestsDone(true).setAllTestsPassed(allTestsPassed);
             LOG.debug("{}Task checked. All tests passed: {}", compiledTask.signature(), allTestsPassed);
-        } catch (final Throwable th){
-            LOG.warn("{}Error while checking solution:", compiledTask.signature(), th);
+            return testingStatusBuilder.build();
+        } catch (final Exception | NoClassDefFoundError | StackOverflowError e){
+            LOG.debug("{}Error while checking solution:", compiledTask.signature(), e);
+            return TestingStatus.error(e);
         }
-        return testingStatusBuilder.build();
     }
 }
