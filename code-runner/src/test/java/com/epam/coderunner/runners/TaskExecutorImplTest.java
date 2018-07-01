@@ -61,10 +61,17 @@ public final class TaskExecutorImplTest {
     @Test
     public void throwStackOverflowError() {
         final Callable<TestingStatus> task = this::infiniteRecursion;
-        thrown.expectMessage("TimeoutException");
+        thrown.expect(StackOverflowError.class);
         taskExecutor.submit(task).block(Duration.ofSeconds(2));
     }
     private TestingStatus infiniteRecursion() {
         return infiniteRecursion();
+    }
+
+    @Test
+    public void throwNoClassDefFoundError() {
+        final Callable<TestingStatus> task = () -> {throw new NoClassDefFoundError();};
+        thrown.expect(NoClassDefFoundError.class);
+        taskExecutor.submit(task).block(Duration.ofSeconds(2));
     }
 }

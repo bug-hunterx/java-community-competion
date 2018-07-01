@@ -29,7 +29,7 @@ final class TaskExecutorImpl implements TaskExecutor {
 
     @Override
     public Mono<TestingStatus> submit(final Callable<TestingStatus> task) {
-        return Mono.fromCallable(task)
+        return Mono.fromCallable(task).onErrorMap(e -> e)
                 .publishOn(scheduler)
                 .timeout(Duration.ofMillis(taskTimeoutMs));
     }
