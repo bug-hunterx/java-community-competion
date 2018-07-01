@@ -1,7 +1,6 @@
 package com.epam.coderunner.runners;
 
 import com.epam.coderunner.model.SourceCode;
-import com.epam.coderunner.support.RuntimeTypeCaptor;
 import com.google.common.reflect.TypeToken;
 import org.joor.Reflect;
 import org.slf4j.Logger;
