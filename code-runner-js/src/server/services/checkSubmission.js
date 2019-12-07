@@ -9,14 +9,23 @@ module.exports = (taskId, userId, source, language) => {
   return getUserTasks(userId)
       .then(userTasks => {
           const task = userTasks.find(task => task.id === taskId);
-
+          const acceptanceTests = Object.keys(task.acceptanceTests)
           if (task.status === 'LOCKED') {
               return {
                   status: 'You did not unlock this task yet',
               };
           }
 
-          let result = {};
+          const result = {
+            totalTestCount: acceptanceTests.length,
+            testsPassed: 0,
+            tests: {
+              passed: [],
+              failed: []
+            }
+
+        }
+
           if (language === 'java') {
               // console.log(`Provided java code for taskId ${taskId}`);
               // console.log(`Source: ${source}`);
@@ -37,9 +46,12 @@ module.exports = (taskId, userId, source, language) => {
 
                       result.totalTestCount = testStatuses.length;
                       result.testsPassed = 0;
-                      testStatuses.forEach(status => {
+                      testStatuses.forEach((status, index) => {
                         if(status === 'PASS'){
+                            result.tests.passed.push(acceptanceTests[index])
                             result.testsPassed += 1;
+                        } else {
+                            result.tests.failed.push(acceptanceTests[index])
                         }
                       });
 
@@ -63,20 +75,18 @@ module.exports = (taskId, userId, source, language) => {
           } else {
             try {
                 const functionToTest = requireFromString(source);
-                result = {
-                    totalTestCount: Object.keys(task.acceptanceTests).length,
-                    testsPassed: 0,
 
-                };
+                console.log(task)
 
                 Object.keys(task.acceptanceTests).forEach((input) => {
                     const expectedOutput = task.acceptanceTests[input].trim();
                     const actualOutput = functionToTest(input).trim();
                     if (expectedOutput === actualOutput) {
                         result.testsPassed += 1;
-                    } else if (!result.firstFailedInput) {
+                        result.tests.passed.push(actualOutput)
+                    } else {
                         console.log(`Test failed for user ${userId}: expected: ${expectedOutput}, actual: ${actualOutput}`);
-                        result.firstFailedInput = input;
+                        result.tests.failed.push(actualOutput)
                     }
                 });
                 if (result.testsPassed / result.totalTestCount >= REQUIRED_PASS_PERCENT / 100) {
